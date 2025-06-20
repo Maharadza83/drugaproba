@@ -1,0 +1,14 @@
+﻿@namespace drugaproba.Components
+
+<CascadingAuthenticationState>  <!-- wymaga Microsoft.AspNetCore.Components.Authorization -->
+  <Router AppAssembly="@typeof(Routes).Assembly">
+    <Found Context="routeData">
+      <RouteView RouteData="@routeData" DefaultLayout="typeof(drugaproba.Shared.MainLayout)" />
+    </Found>
+    <NotFound>
+      <LayoutView Layout="typeof(drugaproba.Shared.MainLayout)">
+        <p>Nie znaleziono strony</p>
+      </LayoutView>
+    </NotFound>
+  </Router>
+</CascadingAuthenticationState>

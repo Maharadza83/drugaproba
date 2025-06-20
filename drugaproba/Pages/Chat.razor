@@ -1,0 +1,43 @@
+﻿@page "/chat"
+@namespace drugaproba.Pages
+@layout drugaproba.Shared.MainLayout
+@inject drugaproba.Services.ChatService ChatSvc
+@inject drugaproba.Services.AuthService Auth
+
+<h3>Czat</h3>
+<ul>
+  @foreach (var m in messages)
+  {
+    <li><b>@m.SenderName</b>: @m.MessageText (@m.Timestamp)</li>
+  }
+</ul>
+<input @bind="newMsg" placeholder="Wiadomość" />
+<button @onclick="Send">Wyślij</button>
+
+@code {
+    List<drugaproba.Models.Message> messages = new();
+    string newMsg = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var token = Auth.Token;
+        if (!string.IsNullOrEmpty(token))
+        {
+            await ChatSvc.StartConnection(token);
+            ChatSvc.OnMessageReceived += m =>
+            {
+                messages.Add(m);
+                InvokeAsync(StateHasChanged);
+            };
+        }
+    }
+
+    async Task Send()
+    {
+        if (!string.IsNullOrEmpty(newMsg))
+        {
+            await ChatSvc.SendMessage(newMsg);
+            newMsg = "";
+        }
+    }
+}

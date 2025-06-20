@@ -1,0 +1,20 @@
+﻿@page "/login"
+@namespace drugaproba.Pages
+@layout drugaproba.Shared.PublicLayout
+@inject drugaproba.Services.AuthService Auth
+@inject NavigationManager Nav
+
+<h3>Logowanie</h3>
+<input @bind="email" placeholder="Email" />
+<input @bind="password" type="password" placeholder="Hasło" />
+<button @onclick="DoLogin">Zaloguj</button>
+
+@code {
+    string email = "", password = "";
+
+    async Task DoLogin()
+    {
+        if (await Auth.Login(new drugaproba.Models.LoginRequest { Email = email, Password = password }))
+            Nav.NavigateTo("/chat");
+    }
+}
