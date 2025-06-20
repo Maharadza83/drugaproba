@@ -1,43 +1,45 @@
-﻿using System;
-using System.Net.Http;
+﻿using drugaproba.Services;
+using Microsoft.AspNetCore.Components.WebView.Maui;  // <- tu
+using Microsoft.Extensions.DependencyInjection;      // <- AddAuthorizationCore
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui;
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
-using Microsoft.AspNetCore.Components.WebView.Maui;  // <- tu
-using Microsoft.Extensions.DependencyInjection;      // <- AddAuthorizationCore
-using drugaproba.Services;
+using System;
+using System.Net.Http;
 
 namespace drugaproba;
 
-public static class MauiProgram
+public static MauiApp CreateMauiApp()
 {
-    public static MauiApp CreateMauiApp()
-    {
-        var builder = MauiApp.CreateBuilder();
-
-        builder
-          .UseMauiApp<App>()
-          .UseMauiBlazorWebView()  // <- extension z Microsoft.Maui.Controls.Hosting
-          .ConfigureFonts(fonts =>
-          {
-              fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-          });
-
-        // HTTP client
-        builder.Services.AddSingleton(sp => new HttpClient
+    var builder = MauiApp.CreateBuilder();
+    builder
+        .UseMauiApp<App>()
+        .ConfigureFonts(fonts =>
         {
-            BaseAddress = DeviceInfo.Platform == DevicePlatform.Android
-                ? new Uri("http://10.0.2.2:5244")
-                : new Uri("http://localhost:5244")
+            fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
         });
 
-        // Serwisy
-        builder.Services.AddSingleton<AuthService>();
-        builder.Services.AddSingleton<ChatService>();
+    // Poprawna rejestracja dla .NET 8
+    builder.Services.AddMauiBlazorWebView();
 
-        // Blazor Authorization
-        builder.Services.AddAuthorizationCore();  // <- wymaga using Microsoft.Extensions.DependencyInjection
+    // Dodaj to, aby ułatwić debugowanie
+#if DEBUG
+    builder.Services.AddBlazorWebViewDeveloperTools();
+    builder.Logging.AddDebug();
+#endif
 
-        return builder.Build();
-    }
+    // Reszta Twojego kodu...
+    builder.Services.AddSingleton(sp => new HttpClient
+    {
+        BaseAddress = DeviceInfo.Platform == DevicePlatform.Android
+            ? new Uri("http://10.0.2.2:5244")
+            : new Uri("http://localhost:5244")
+    });
+
+    builder.Services.AddSingleton<AuthService>();
+    builder.Services.AddSingleton<ChatService>();
+    builder.Services.AddAuthorizationCore();
+
+    return builder.Build();
 }
